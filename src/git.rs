@@ -1,18 +1,37 @@
-use color_eyre::eyre::Result;
-use git2::{PushOptions, Remote, RemoteCallbacks, Repository};
+use git2::{
+    RemoteCallbacks,
+    PushOptions,
+    Repository,
+    Remote,
+};
+use thiserror::Error;
 
 use crate::cred;
 
-fn commit_tree(r: &Repository) -> Result<()> {
+#[derive(
+    Error,
+    Debug,
+)]
+
+pub enum SyncError {
+    #[error("failed to commit tree: {0}")]
+    Commit(git2::Error),
+    #[error("failed to push tree: {0}")]
+    Push(git2::Error),
+    #[error("failed to add tree: {0}")]
+    Add(git2::Error),
+    #[error("a git error occurred: {0}")]
+    Other(#[from] git2::Error),
+}
+
+fn commit_tree(r: &Repository) -> Result<(), git2::Error> {
     let mut index = r.index()?;
 
     let oid = index.write_tree()?;
     index.write()?;
 
     let revres = r.revparse_ext("HEAD");
-
     let tree = r.find_tree(oid)?;
-
     let sig = r.signature()?;
 
     match revres.ok() {
@@ -21,7 +40,7 @@ fn commit_tree(r: &Repository) -> Result<()> {
                 Some("HEAD"),
                 &sig, 
                 &sig,
-                "HEAD",
+                "sync",
                 &tree,
                 &[c],
             )?;
@@ -32,7 +51,7 @@ fn commit_tree(r: &Repository) -> Result<()> {
                 Some("HEAD"),
                 &sig, 
                 &sig,
-                "HEAD",
+                "sync",
                 &tree,
                 &[],
             )?;
@@ -42,21 +61,19 @@ fn commit_tree(r: &Repository) -> Result<()> {
     Ok(())
 }
 
-fn add_tree(r: &Repository) -> Result<()> {
+fn add_tree(r: &Repository) -> Result<(), git2::Error> {
     let mut index = r.index()?;
 
     index.add_all(
         ["."],
         Default::default(),
         None,
-    )?;
-
-    Ok(())
+    )
 }
 
 fn push_tree(
     remote: &mut Remote,
-) -> Result<()> {
+) -> Result<(), git2::Error> {
     let mut cbs = RemoteCallbacks::new();
 
     cbs.credentials(|_, uname, _| {
@@ -70,11 +87,9 @@ fn push_tree(
     opts.remote_callbacks(cbs);
 
     remote.push::<&str>(
-        &["refs/heads/master"],
+        &["refs/heads/sync"],
         Some(&mut opts),
     )?;
-
-    println!("NOTHERE");
 
     Ok(())
 }
@@ -82,7 +97,7 @@ fn push_tree(
 pub fn update(
     repo: Repository,
     remote_url: &str,
-) -> Result<()> {
+) -> Result<(), SyncError> {
     let mut remote = repo
         .find_remote("sync").or_else(|_| {
             repo.remote("sync", remote_url)
@@ -97,9 +112,9 @@ pub fn update(
         )?;
     }
 
-    add_tree(&repo)?;
-    commit_tree(&repo)?;
-    push_tree(&mut remote)?;
+    add_tree(&repo).map_err(SyncError::Add)?;
+    commit_tree(&repo).map_err(SyncError::Commit)?;
+    push_tree(&mut remote).map_err(SyncError::Push)?;
 
     Ok(())
 }

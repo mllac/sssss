@@ -25,7 +25,7 @@ use rayon::iter::{ParallelBridge, ParallelIterator};
 use git2::Repository;
 use thiserror::Error;
 
-use crate::git;
+use crate::git::{self, SyncError};
 
 // check if `path` exists under ~/.config/
 pub fn in_config(path: impl AsRef<Path>) -> bool {
@@ -65,8 +65,8 @@ pub enum StoreError {
     NotExists,
     #[error("path already exists in the store")]
     Duplicate,
-    #[error(transparent)]
-    Eyre(#[from] color_eyre::Report),
+    #[error("failed to sync: {0}")]
+    Sync(#[from] SyncError),
 }
 
 pub struct Store {
