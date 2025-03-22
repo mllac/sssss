@@ -72,7 +72,7 @@ fn push_tree(
     println!("GOTHERE");
 
     remote.push(
-        &["."],
+        &["HEAD:master"],
         Some(&mut opts),
     )?;
 
