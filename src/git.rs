@@ -29,7 +29,7 @@ fn commit_tree(r: &Repository) -> Result<()> {
         Some(_) |
         None => {
             r.commit(
-                None,
+                Some("HEAD"),
                 &sig, 
                 &sig,
                 "HEAD",
@@ -70,7 +70,7 @@ fn push_tree(
     opts.remote_callbacks(cbs);
 
     remote.push(
-        &["."],
+        &["HEAD"],
         Some(&mut opts),
     )?;
 
