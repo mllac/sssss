@@ -1,0 +1,14 @@
+[package]
+name = "system-sync"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.97"
+clap = { version = "4.5.32", features = ["derive"] }
+color-eyre = "0.6.3"
+crossterm = "0.28.1"
+git2 = "0.20.1"
+ratatui = { version = "0.29.0", features = ["crossterm", "unstable-widget-ref"] }
+rayon = "1.10.0"
+thiserror = "2.0.12"
