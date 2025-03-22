@@ -69,10 +69,12 @@ fn push_tree(
 
     opts.remote_callbacks(cbs);
 
-    println!("GOTHERE");
+    let refs = remote.refspecs()
+        .filter_map(|x| x.str().map(ToOwned::to_owned))
+        .collect::<Vec<_>>();
 
-    remote.push::<&str>(
-        &[],
+    remote.push::<String>(
+        &refs,
         Some(&mut opts),
     )?;
 
