@@ -71,11 +71,11 @@ fn push_tree(
 
     println!("GOTHERE");
 
-    let refs = remote.get_refspec(1)
+    let refs = remote.get_refspec(0)
         .expect("no refspecs?");
 
-    remote.push(
-        &[refs.str().unwrap()],
+    remote.push::<&str>(
+        &[],
         Some(&mut opts),
     )?;
 
