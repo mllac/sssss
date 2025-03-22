@@ -4,6 +4,7 @@ use git2::{
     Repository,
     Remote,
 };
+
 use thiserror::Error;
 
 use crate::cred;
@@ -87,7 +88,7 @@ fn push_tree(
     opts.remote_callbacks(cbs);
 
     remote.push::<&str>(
-        &["refs/heads/sync"],
+        &["refs/heads/master"],
         Some(&mut opts),
     )?;
 
