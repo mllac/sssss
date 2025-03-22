@@ -69,12 +69,8 @@ fn push_tree(
 
     opts.remote_callbacks(cbs);
 
-    let refs = remote.refspecs()
-        .filter_map(|x| x.str().map(ToOwned::to_owned))
-        .collect::<Vec<_>>();
-
-    remote.push::<String>(
-        &refs,
+    remote.push::<&str>(
+        &["refs/heads/master"],
         Some(&mut opts),
     )?;
 
