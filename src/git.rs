@@ -29,7 +29,7 @@ fn commit_tree(r: &Repository) -> Result<()> {
         Some(_) |
         None => {
             r.commit(
-                Some("HEAD"),
+                None,
                 &sig, 
                 &sig,
                 "HEAD",
