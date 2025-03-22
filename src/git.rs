@@ -69,10 +69,14 @@ fn push_tree(
 
     opts.remote_callbacks(cbs);
 
+    println!("GOTHERE");
+
     remote.push(
-        &["HEAD"],
+        &["."],
         Some(&mut opts),
     )?;
+
+    println!("NOTHERE");
 
     Ok(())
 }
